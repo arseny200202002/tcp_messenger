@@ -1,0 +1,4 @@
+peewee
+asyncio
+sockets
+psycopg2
