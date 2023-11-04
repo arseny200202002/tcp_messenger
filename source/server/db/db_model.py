@@ -1,6 +1,6 @@
 from peewee import *
 
-from db_config import DB
+from .db_config import DB
 
 db = PostgresqlDatabase(DB.NAME,
                         user=DB.USER,
