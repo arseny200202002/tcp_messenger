@@ -8,6 +8,13 @@ sys.path.append(cwd)
 
 from source.server.db.db_requests import *
 
+def row_existence(object:BaseModel):
+    query = type(object).select().where(type(object).id == object.id)
+    if query.exists():
+        return True
+    else:
+        return False
+
 class TestDbRequests(unittest.TestCase):
     
     def test_check_sing_in(self):
@@ -18,17 +25,27 @@ class TestDbRequests(unittest.TestCase):
         self.assertEqual(check_sing_up('test_login_1'), True)
         self.assertEqual(check_sing_up('dont_exist'), False)
     
+    def test_get_user_id(self):
+        self.assertEqual(get_user_id('test_login_1'), 1001)
+
     def test_create_user(self):
-        self.assertEqual(create_user('test_name_1', 'password', 'test_login_1'), Exception)
+        user_1 = Users(username='test_name_1', password_hash='password', login='test_login_1')
+        self.assertEqual(create_user(user_1), Exception)
+
         time = datetime.now().time()
-        self.assertEqual(type(create_user(f'{time}', 'test_password', f'{time}')), int)
+        user_2 = Users(username=f'{time}', password_hash='test_password', login=f'{time}')
+        self.assertEqual(type(create_user(user_2)), int)
 
     def test_create_chat(self):
-        self.assertEqual(create_chat(1001, 1002, 1001, 'test_chat'), True)
+        chat = Chats(creator_id=1001, name='test_chat')
+        create_chat(chat, 1001, 1002)
+        self.assertEqual(row_existence(chat), True)
 
     def test_create_message(self):
         now = datetime.now()
-        self.assertEqual(create_message(1001, str(now), now, 'test_login_1'), True)
+        message = Messages(text = str(now), send_date=now, author_name='test_login_1')
+        create_message(1001, message)
+        self.assertEqual(row_existence(message), True)
 
 
 if __name__ == "__main__":

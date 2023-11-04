@@ -32,3 +32,8 @@ async def main(host, port):
 
 if __name__ == "__main__":
     asyncio.run(main(SERVER_HOST, SERVER_PORT))
+    #config = ConfigParser()
+    #config.read("D:\my_projects\python_projects\tcp_messenger\source\server\server.ini")
+    #print(config.sections())
+
+

@@ -8,6 +8,16 @@ def check_requests(func):
         else: return False
     return inner
 
+def exception_handler(func):
+    def inner(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            #print(f"An exception occured: {str(e)}")
+            return Exception
+    return inner
+
 @check_requests
 def check_sing_in(login_: str, password_hash_: str):
     query = Users.select().where(Users.login == login_, Users.password_hash == password_hash_)
@@ -18,52 +28,24 @@ def check_sing_up(login_: str):
     query = Users.select().where(Users.login == login_)
     return query
 
-# настроить передачу параметров в виде кортежа для его распаковки
-def create_user(username_: str, password_hash_: str, login_: str, id_: int=None, mail_: str=None):
-    if id_ is None:
-        user = Users(username=username_, password_hash=password_hash_, login=login_, mail=mail_)
-    else:
-        user = Users(username=username_, password_hash=password_hash_, login=login_, mail=mail_, id=id_)
-    try:
-        user.save()
-        return user.id
-    except Exception as e:
-        return Exception
-
-def get_user_id(username_: str) -> int:
-    user_id = Users.select(Users.id).where(Users.username == username_).get()
+def get_user_id(login_: str) -> int:
+    user_id = Users.get(Users.login == login_).id
     return user_id
 
-def create_chat(user_1_id: int, user_2_id: int, creator_id_: int, chat_name_: str=None, id_: int=None):
-    if id_ is None:
-        chat = Chats(creator_id=creator_id_, name=chat_name_)
-    else:
-        chat = Chats(creator_id=creator_id_, name=chat_name_, id=id_)
+@exception_handler
+def create_user(user: Users):
+    user.save(force_insert=True)
+    return user.id
 
-    chat.save()
+@exception_handler
+def create_chat(chat: Chats, user_1_id: int, user_2_id: int):
+    chat.save(force_insert=True)
     chat_id_ = chat.id
 
-    query_2 = ChatsUsers.insert(chat_id=chat_id_, user_id=user_1_id)
-    query_3 = ChatsUsers.insert(chat_id=chat_id_, user_id=user_2_id)
-    
-    try:
-        query_2.execute()
-        query_3.execute()
-        return True
-    except:
-        return False
-    
-def create_message(chat_id_: int, message_text: str, send_date_, author: str):
-    query_1 = Messages.insert(text=message_text,
-                              send_date=send_date_,
-                              author_name=author)
-    
-    message_id_ = query_1.execute()
+    chat_user_2 = ChatsUsers(chat_id=chat_id_, user_id=user_1_id).save(force_insert=True)
+    chat_user_3 = ChatsUsers(chat_id=chat_id_, user_id=user_2_id).save(force_insert=True)
 
-    query_2 = ChatsMessages.insert(chat_id=chat_id_,
-                                   message_id=message_id_)
-
-    query_2.execute()
-
-    return True
-
+@exception_handler        
+def create_message(chat_id_: int, message: Messages):
+    message.save(force_insert=True)
+    chat_message = ChatsMessages(chat_id=chat_id_, message_id=message.id).save(force_insert=True)
