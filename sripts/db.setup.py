@@ -16,9 +16,8 @@ def create_tables():
         db.create_tables(tables)
 
 if __name__ == "__main__":
-    #delete_tables()
-    #create_tables()
-    pass
+    delete_tables()
+    create_tables()
 
 
 

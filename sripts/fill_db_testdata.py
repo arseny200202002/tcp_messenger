@@ -22,8 +22,8 @@ if __name__ == "__main__":
     create_user(*User_3)
     create_user(*User_4)
     #Chats
-    create_chat(1001, 1002, 1001, 'test_chat', id_=1000)
-    create_chat(1001, 1003, 1001, 'test_chat', id_=1001)
+    create_chat(1001, 1002, 1001, 'test_chat', 1000)
+    create_chat(1001, 1003, 1001, 'test_chat', 1001)
     #Messages
     now = datetime.now()
     create_message(1001, 'message_1', now, 'test_name_1')

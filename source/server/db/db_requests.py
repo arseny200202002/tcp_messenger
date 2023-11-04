@@ -20,14 +20,13 @@ def check_sing_up(login_: str):
 
 # настроить передачу параметров в виде кортежа для его распаковки
 def create_user(username_: str, password_hash_: str, login_: str, id_: int=None, mail_: str=None):
-    query = Users.insert(username=username_,
-                         password_hash=password_hash_,
-                         login=login_,
-                         mail=mail_,
-                         id=id_)
+    if id_ is None:
+        user = Users(username=username_, password_hash=password_hash_, login=login_, mail=mail_)
+    else:
+        user = Users(username=username_, password_hash=password_hash_, login=login_, mail=mail_, id=id_)
     try:
-        user_id = query.execute()
-        return user_id
+        user.save()
+        return user.id
     except Exception as e:
         return Exception
 
@@ -36,15 +35,16 @@ def get_user_id(username_: str) -> int:
     return user_id
 
 def create_chat(user_1_id: int, user_2_id: int, creator_id_: int, chat_name_: str=None, id_: int=None):
-    query_1 = Chats.insert(creator_id=creator_id_,
-                           name=chat_name_,
-                           id=id_)
-    chat_id_ = query_1.execute()
+    if id_ is None:
+        chat = Chats(creator_id=creator_id_, name=chat_name_)
+    else:
+        chat = Chats(creator_id=creator_id_, name=chat_name_, id=id_)
 
-    query_2 = ChatsUsers.insert(chat_id=chat_id_,
-                                user_id=user_1_id)
-    query_3 = ChatsUsers.insert(chat_id=chat_id_,
-                                user_id=user_2_id)
+    chat.save()
+    chat_id_ = chat.id
+
+    query_2 = ChatsUsers.insert(chat_id=chat_id_, user_id=user_1_id)
+    query_3 = ChatsUsers.insert(chat_id=chat_id_, user_id=user_2_id)
     
     try:
         query_2.execute()
@@ -65,5 +65,5 @@ def create_message(chat_id_: int, message_text: str, send_date_, author: str):
 
     query_2.execute()
 
-
+    return True
 
