@@ -47,8 +47,9 @@ class ChatsUsers(BaseModel):
         db_table = 'ChatsUsers'
 
 class Messages(BaseModel):
-    text =      TextField(null=False)
-    send_date = DateTimeField()
+    text =          TextField(null=False)
+    send_date =     DateTimeField()
+    author_name =   CharField(null=False)
 
     class Meta:
         db_table = 'Messages'
