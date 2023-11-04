@@ -1,6 +1,5 @@
 import asyncio
-from configparser import ConfigParser
-from server_config import *
+import configparser
 
 async def handle_connection(reader, writer):
 
@@ -27,13 +26,14 @@ async def handle_connection(reader, writer):
 
 async def main(host, port):
     server = await asyncio.start_server(handle_connection, host, port)
+    print("server successfully started")
     async with server:
         await server.serve_forever()
 
 if __name__ == "__main__":
-    asyncio.run(main(SERVER_HOST, SERVER_PORT))
-    #config = ConfigParser()
-    #config.read("D:\my_projects\python_projects\tcp_messenger\source\server\server.ini")
-    #print(config.sections())
+    config = configparser.ConfigParser()
+    config.read("source\server\server_config.ini")
+
+    asyncio.run(main(config["SERVER"]["SERVER_HOST"], config["SERVER"]["SERVER_PORT"]))
 
 

@@ -1,10 +1,10 @@
 import socket
-from server_config import *
+import configparser
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((SERVER_HOST, SERVER_PORT))
+def client_handler(host, port):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((host, port))
 
-def client_hanler(client_socket):
     while True:
         print('type your message: ')
         request = input()
@@ -15,4 +15,8 @@ def client_hanler(client_socket):
         print(answer)
 
 if __name__ == "__main__":
-    client_hanler(client_socket)
+    config = configparser.ConfigParser()
+    config.read("server_config.ini")
+
+    #print(config["SERVER"]["SERVER_HOST"])
+    client_handler(config["SERVER"]["SERVER_HOST"], int(config["SERVER"]["SERVER_PORT"]))
