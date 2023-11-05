@@ -25,7 +25,7 @@ class Users(BaseModel):
         db_table = 'Users'
 
 class Sessions(BaseModel):
-    user_id =           ForeignKeyField(Users, backref='sessions')
+    user_id =           ForeignKeyField(Users, backref='sessions', unique=True)
     last_update_time =  DateTimeField()
     state =             IntegerField()
 
