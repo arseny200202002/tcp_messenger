@@ -32,19 +32,21 @@ def check_sing_up(login_: str):
     return query
 
 @exception_handler
-def create_session(session: Sessions):
-    #session = Sessions()
+def create_session(time: datetime, address: str, port: int):
+    session = Sessions(last_update_time=time, address=address, port=port, state=0)
     session.save(force_insert=True)
 
 @exception_handler
-def create_user(user: Users, address: str, port: int):
+def create_user(login:str, password_hash: str, username: str, address: str, port: int):
+    user = Users(username=username, password_hash=password_hash, login=login)
     user.save(force_insert=True)
     now = datetime.now()
     update_session(4, now, address, port) # state 4 stands fro main menu
     return user.id
 
 @exception_handler
-def create_chat(chat: Chats, user_1_id: int, user_2_id: int):
+def create_chat(creator_id: int, name: str, user_1_id: int, user_2_id: int):
+    chat = Chats(creator_id=creator_id, name=name)
     chat.save(force_insert=True)
     chat_id_ = chat.id
 
@@ -52,7 +54,8 @@ def create_chat(chat: Chats, user_1_id: int, user_2_id: int):
     chat_user_3 = ChatsUsers(chat_id=chat_id_, user_id=user_2_id).save(force_insert=True)
 
 @exception_handler        
-def create_message(chat_id: int, message: Messages):
+def create_message(chat_id: int, text: str, send_date: str, author_name: str):
+    message = Messages(text=text, send_date=send_date, author_name=author_name)
     message.save(force_insert=True)
     chat_message = ChatsMessages(chat_id=chat_id, message_id=message.id).save(force_insert=True)
 
@@ -76,8 +79,8 @@ def get_user_id(login: str) -> int:
     user_id = Users.get(Users.login == login).id
     return user_id
 
-def get_state(address: IPField):
-    state = Sessions.get(Sessions.address == address).state
+def get_state(address: str, port: int) -> int:
+    state = Sessions.get(Sessions.address == address, Sessions.port == port).state
     return state
 
 @exception_handler
