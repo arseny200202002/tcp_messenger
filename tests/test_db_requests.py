@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+import ipaddress
 
 import os 
 import sys 
@@ -8,8 +9,21 @@ sys.path.append(cwd)
 
 from source.server.db.db_requests import *
 
-def session_existence(user_id: int, state: int):
-    query = Sessions.select().where(Sessions.user_id == user_id, Sessions.state == state)
+def integer_to_ip(int_ip):
+    return ipaddress.ip_address(int_ip).__str__()
+
+def random_addr_port() -> tuple:
+    """
+    returns tuple: address, port \n
+    of random address out of (0, 100000) \n
+    and random port out of range (0, 10000)
+    """
+    address = integer_to_ip(random.randrange(0, 100000))
+    port = random.randrange(0, 10000)
+    return address, port
+
+def session_existence(state:int, address: str, port: int):
+    query = Sessions.select().where(Sessions.address == address, Sessions.port == port, Sessions.state == state)
     if query.exists():
         return True
     else:
@@ -36,12 +50,15 @@ class TestDbRequests(unittest.TestCase):
         self.assertEqual(get_user_id('test_login_1'), 1001)
 
     def test_create_user(self):
+        address, port = random_addr_port()
         user_1 = Users(username='test_name_1', password_hash='password', login='test_login_1')
-        self.assertEqual(create_user(user_1), Exception)
+        self.assertEqual(create_user(user_1, address, port), Exception)
 
-        time = datetime.now().time()
+        time = datetime.now()
+        address, port = random_addr_port()
+
         user_2 = Users(username=f'{time}', password_hash='test_password', login=f'{time}')
-        self.assertEqual(type(create_user(user_2)), int)
+        self.assertEqual(type(create_user(user_2, address, port)), int)
 
     def test_create_chat(self):
         chat = Chats(creator_id=1001, name='test_chat')
@@ -55,10 +72,14 @@ class TestDbRequests(unittest.TestCase):
         self.assertEqual(row_existence(message), True)
 
     def test_create_session(self):
+        # setup test data
         now = datetime.now()
-        user = Users(username=f'{now}', password_hash='test_password', login=f'{now}')
-        create_user(user)
-        self.assertEqual(session_existence(user.id, -1), True)
+        address, port = random_addr_port()
+
+        session = Sessions(last_update_time=now, address=address, port=port, state=0)
+        create_session(session)
+        # check session existence
+        self.assertEqual(session_existence(0, address, port), True)
     
     def test_get_message_history(self):
         self.assertEqual(len(get_message_history(1001)), 4)
@@ -68,10 +89,13 @@ class TestDbRequests(unittest.TestCase):
 
     def test_update_session(self):
         now = datetime.now()
-        update_session(1001, 1000, now)
-        self.assertEqual(session_existence(1001, 1000), True)
+        update_session(1000, now, '127.0.0.0', 5001)
+        self.assertEqual(session_existence(state=1000, address='127.0.0.0', port=5001), True)
 
+    def test_get_state(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
+    #tests = TestDbRequests().test_create_user()
     

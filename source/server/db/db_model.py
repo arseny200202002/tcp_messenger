@@ -41,11 +41,13 @@ class Sessions(BaseModel):
     user_id =           IntegerField(null=True)
     last_update_time =  DateTimeField()
     state =             IntegerField(default=0)
-    address =           IPField(null=True)
+    address =           IPField(null=False)
+    port =              IntegerField(null=False)
     is_guest =          BooleanField(default=True)
 
     class Meta:
         db_table = 'Sessions'
+        primary_key = CompositeKey('address', 'port')
 
 class Chats(BaseModel):
     creator_id =    ForeignKeyField(Users)

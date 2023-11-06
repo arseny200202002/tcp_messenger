@@ -1,5 +1,6 @@
 from .db_model import *
 from datetime import datetime
+import random
 
 def check_requests(func):
     def inner(*args, **kwargs):
@@ -32,16 +33,14 @@ def check_sing_up(login_: str):
 
 @exception_handler
 def create_session(session: Sessions):
-    now = datetime.now()
-    session.last_update_time = now
+    #session = Sessions()
     session.save(force_insert=True)
 
 @exception_handler
-def create_user(user: Users):
+def create_user(user: Users, address: str, port: int):
     user.save(force_insert=True)
     now = datetime.now()
-    session = Sessions(user_id=user.id, last_update_date=now, state=-1, is_guest=False)
-    create_session(session)
+    update_session(4, now, address, port) # state 4 stands fro main menu
     return user.id
 
 @exception_handler
@@ -77,7 +76,11 @@ def get_user_id(login: str) -> int:
     user_id = Users.get(Users.login == login).id
     return user_id
 
+def get_state(address: IPField):
+    state = Sessions.get(Sessions.address == address).state
+    return state
+
 @exception_handler
-def update_session(user_id: int, state: int, time: datetime):
-    query = Sessions.update(state=state, last_update_time=time).where(Sessions.user_id == user_id)
+def update_session(state: int, time: datetime, address: str, port: int):
+    query = Sessions.update(state=state, last_update_time=time).where(Sessions.address == address, Sessions.port == port)
     query.execute()
