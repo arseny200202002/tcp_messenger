@@ -73,8 +73,8 @@ def get_chats(user_id: int) -> list:
     chats = [chat.name for chat in query]
     return chats
 
-def get_user_id(login_: str) -> int:
-    user_id = Users.get(Users.login == login_).id
+def get_user_id(login: str) -> int:
+    user_id = Users.get(Users.login == login).id
     return user_id
 
 @exception_handler
