@@ -2,3 +2,5 @@ peewee
 asyncio
 sockets
 psycopg2
+re
+datetime

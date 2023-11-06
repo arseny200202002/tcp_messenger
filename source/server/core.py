@@ -1,14 +1,20 @@
 import asyncio
 import configparser
+from db.db_requests import *
+from server_logic import *
 
 async def handle_connection(reader, writer):
 
     address = writer.get_extra_info("peername")
     print(f"Connected by {address}")
 
+    start_request = 'start'.encode()
+    writer.write(start_request)
+        
     while True:
         try:
             data = await reader.read(1024)
+            data = data.decode()
         except ConnectionError:
             print(f"Client suddenly closed while receiving from {address}")
             break
@@ -33,7 +39,9 @@ async def main(host, port):
 if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read("source\server\server_config.ini")
+    host = config["SERVER"]["SERVER_HOST"]
+    port = config["SERVER"]["SERVER_PORT"]
 
-    asyncio.run(main(config["SERVER"]["SERVER_HOST"], config["SERVER"]["SERVER_PORT"]))
+    asyncio.run(main(host, port))
 
 

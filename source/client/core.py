@@ -1,33 +1,37 @@
 import socket
 import configparser
 
-from client_logic import requests
-from client_logic import answer_templates
+from client_logic import *
 
 def client_handler(host, port):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((host, port))
 
-    client_socket.sendall(requests.initialization_request())
-    answer = client_socket.recv(1024)
+    raw_answer = client_socket.recv(1024).decode()
+    answer = parse_server_answer(raw_answer)
+    template = answer.template
 
     while True:
         # input part
-        print('type your message: ')
-        request = input()
-        request = request.encode('utf-8')
+        request = input_templates.templates[template]()
+        # если на этапе проверки введенных данных возникла ошибка
+        if request == 'error':
+            print(client_error_messages[template])
+            continue
         # send request
         client_socket.sendall(request)
         # receive answer 
-        answer = client_socket.recv(1024)
-        answer = answer.decode('utf-8')
-        print(answer)
-        # prosess answer
-
+        raw_answer = client_socket.recv(1024).decode()
+        answer = parse_server_answer(raw_answer)
+        # обработка ошибок
+        if answer.template != 'error':
+            template = answer.template # вызываем новый шаблон если не было ошибки на строне сервера
+        else:
+            print(server_error_messages[template])
+        
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read("server_config.ini")
 
-    #print(config["SERVER"]["SERVER_HOST"])
     client_handler(config["SERVER"]["SERVER_HOST"], int(config["SERVER"]["SERVER_PORT"]))
