@@ -9,13 +9,14 @@ def check_requests(func):
         else: return False
     return inner
 
+# при отладке нужно убрать комментарий
 def exception_handler(func):
     def inner(*args, **kwargs):
         try:
             result = func(*args, **kwargs)
             return result
         except Exception as e:
-            print(f"An exception occured: {str(e)}")
+            #print(f"An exception occured: {str(e)}")
             return Exception
     return inner
 
@@ -39,7 +40,7 @@ def create_session(session: Sessions):
 def create_user(user: Users):
     user.save(force_insert=True)
     now = datetime.now()
-    session = Sessions(user_id=user.id, last_update_date=now, state=-1)
+    session = Sessions(user_id=user.id, last_update_date=now, state=-1, is_guest=False)
     create_session(session)
     return user.id
 

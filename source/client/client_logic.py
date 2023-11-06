@@ -13,12 +13,16 @@ class requests:
         request += command
         return request.encode()
 
-basic_commands = {'back': 'BACK',
-                  'exit': 'EXIT'}
+basic_commands = {
+    'back': 'BACK',
+    'exit': 'EXIT',
+    }
 
-commands = {'sing_in': 'LOGIN',
-            'sing_up': 'REGISTER',
-            'create_chat': 'CREATE'}
+commands = {
+    'sing_in':      'LOGIN',
+    'sing_up':      'REGISTER',
+    'create_chat':  'CREATE',
+    }
 
 def data_validation(num_of_values=1):
     def input_validation(func):
@@ -65,26 +69,32 @@ class input_templates:
         print("введите текст сообщения: ")
         return input()
 
-    templates = {'start':       start,
-                 'sing_in':     sing_in,
-                 'sing_up':     sing_up,
-                 'main':        main,
-                 'create_chat': create_chat,
-                 'send_message':send_message}
+    templates = {
+        'start':       start,
+        'sing_in':     sing_in,
+        'sing_up':     sing_up,
+        'main':        main,
+        'create_chat': create_chat,
+        'send_message':send_message,
+        }
 
-client_error_messages = {'start':       "ОШИБКА: вероятно была введена неверная команда",
-                         'sing_in':     "ОШИБКА: проверьте введенные данные",
-                         'sing_up':     "ОШИБКА: проверьте введенные данные",
-                         'main':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
-                         'create_chat': "ОШИБКА: проверьте введенные данные",
-                         'send_message':"ОШИБКА: нельзя отправить пустое сообщение"}
+client_error_messages = {
+    'start':       "ОШИБКА: вероятно была введена неверная команда",
+    'sing_in':     "ОШИБКА: проверьте введенные данные",
+    'sing_up':     "ОШИБКА: проверьте введенные данные",
+    'main':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
+    'create_chat': "ОШИБКА: проверьте введенные данные",
+    'send_message':"ОШИБКА: нельзя отправить пустое сообщение",
+}
 
-server_error_messages = {'start':       "ОШИБКА: вероятно была введена неверная команда",
-                         'sing_in':     "ОШИБКА: введены неверные данные",
-                         'sing_up':     "ОШИБКА: пользователь с таким именем или логином уже существует",
-                         'main':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
-                         'create_chat': "ОШИБКА: пользователся с таким именем не существует",
-                         'send_message':"ОШИБКА: !!!требуется доработка!!!"}
+server_error_messages = {
+    'start':       "ОШИБКА: вероятно была введена неверная команда",
+    'sing_in':     "ОШИБКА: введены неверные данные",
+    'sing_up':     "ОШИБКА: пользователь с таким именем или логином уже существует",
+    'main':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
+    'create_chat': "ОШИБКА: пользователся с таким именем не существует",
+    'send_message':"ОШИБКА: !!!требуется доработка!!!",
+}
 
 class server_answer:
     def __init__(self, template:str = None, data:list = None):

@@ -1,12 +1,25 @@
 from peewee import *
-
+import configparser
 from .db_config import DB
 
-db = PostgresqlDatabase(DB.NAME,
-                        user=DB.USER,
-                        password=DB.PASSWORD,
-                        host=DB.HOST,
-                        port=DB.port)
+"""
+config = configparser.ConfigParser()
+config.read('source\db\db_config.ini')
+db_settings = config['db']
+name = db_settings['NAME']
+user = db_settings['USER']
+password = db_settings['PASSWORD']
+host = db_settings['HOST']
+port = db_settings['PORT']
+"""
+
+db = PostgresqlDatabase(
+    DB.NAME,
+    user=DB.USER,
+    password=DB.PASSWORD,
+    host=DB.HOST,
+    port=DB.port
+    )
 
 class BaseModel(Model):
     id = PrimaryKeyField(unique=True)
@@ -25,9 +38,11 @@ class Users(BaseModel):
         db_table = 'Users'
 
 class Sessions(BaseModel):
-    user_id =           ForeignKeyField(Users, backref='sessions', unique=True)
+    user_id =           IntegerField(null=True)
     last_update_time =  DateTimeField()
-    state =             IntegerField()
+    state =             IntegerField(default=0)
+    address =           IPField(null=True)
+    is_guest =          BooleanField(default=True)
 
     class Meta:
         db_table = 'Sessions'
