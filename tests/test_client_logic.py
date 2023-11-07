@@ -15,7 +15,7 @@ def input_validation(input, len_of_data=1):
     if len(words) != len_of_data: return 'error'
     return requests.data_request(words)
 
-class TestClientRequests(unittest.TestCase):
+class TestClientLOGIC(unittest.TestCase):
     def test_input_validation_func(self):
         self.assertEqual(input_validation(''), 'error')
         self.assertEqual(input_validation('LOGIN'), b'COMMAND:LOGIN')
@@ -24,7 +24,7 @@ class TestClientRequests(unittest.TestCase):
         self.assertEqual(input_validation('test_login test_password', 2), b'DATA:test_login|test_password|')
         self.assertEqual(input_validation('test_login test_password', 3), 'error')
 
-    def test_parse_answer(self):
+    def test_parse_server_answer(self):
         self.assertEqual(parse_server_answer('TEMPLATE:start').template, 'start')
         self.assertEqual(parse_server_answer('TEMPLATE:sing_in:DATA:test_1:test_2'), server_answer('sing_in', ['test_1', 'test_2']))
         self.assertEqual(parse_server_answer('ERROR').template, 'error')

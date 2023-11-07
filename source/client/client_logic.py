@@ -14,14 +14,14 @@ class requests:
         return request.encode()
 
 basic_commands = {
-    'back': 'BACK',
-    'exit': 'EXIT',
+    'BACK': 'BACK',
+    'EXIT': 'EXIT',
     }
 
 commands = {
-    'sing_in':      'LOGIN',
-    'sing_up':      'REGISTER',
-    'create_chat':  'CREATE',
+    'login':      'LOGIN',
+    'register':      'REGISTER',
+    'chat_creation':  'CREATE',
     }
 
 def data_validation(num_of_values=1):
@@ -32,68 +32,73 @@ def data_validation(num_of_values=1):
             if input in commands.values() or input in basic_commands.values():
                 return requests.command_request(input)
             words = re.findall(r'\b\S+\b', input)
-            if len(words) != num_of_values: return 'error'
+            if len(words) != num_of_values:
+                return 'error'
             return requests.data_request(words)
         return inner
     return input_validation
 
 class input_templates:
     @data_validation()
-    def start() -> str:
-        print(f"для входа введите: {commands['sing_in']}\nдля регистрации введите: {commands['sing_up']}")
+    def authorization() -> str:
+        print(f"для входа введите: {commands['login']}\nдля регистрации введите: {commands['register']}")
         return input()
 
     @data_validation(num_of_values=2)
-    def sing_in() -> str:
+    def login() -> str:
         print("введите логин и пароль\n")
         return input()
+    
     @data_validation(num_of_values=3)
-    def sing_up() -> str:
+    def register() -> str:
         print("введите логин, пароль и отображаемое имя: ")
         return input()
+    
     @data_validation(num_of_values=1)
-    def main() -> str:
-        print(f"для создания чата введите: {commands['create_chat']}\n")
+    def main_menu() -> str:
+        print(f"для создания чата введите: {commands['chat_creation']}\n")
         print("для выбора чата введите его название: ")
         return input()
+    
     @data_validation(num_of_values=2)
-    def create_chat() -> str:
+    def chat_creation() -> str:
         print("введите имя пользователя, с которым вы хотите создать чат: ")
         username = input()
 
         print("введите название чата (можно оставить пустым):")
         chat_name = input()
         return username + ' ' + chat_name
+    
     @data_validation(num_of_values=1)
-    def send_message() -> str:
+    def in_chat() -> str:
         print("введите текст сообщения: ")
         return input()
 
     templates = {
-        'start':       start,
-        'sing_in':     sing_in,
-        'sing_up':     sing_up,
-        'main':        main,
-        'create_chat': create_chat,
-        'send_message':send_message,
+        'authorization':    authorization,
+        'login':            login,
+        'register':         register,
+        'main_menu':        main_menu,
+        'chat_creation':    chat_creation,
+        'in_chat':          in_chat,
         }
 
 client_error_messages = {
-    'start':       "ОШИБКА: вероятно была введена неверная команда",
-    'sing_in':     "ОШИБКА: проверьте введенные данные",
-    'sing_up':     "ОШИБКА: проверьте введенные данные",
-    'main':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
-    'create_chat': "ОШИБКА: проверьте введенные данные",
-    'send_message':"ОШИБКА: нельзя отправить пустое сообщение",
+    'authorization':       "ОШИБКА: вероятно была введена неверная команда",
+    'login':     "ОШИБКА: проверьте введенные данные",
+    'register':     "ОШИБКА: проверьте введенные данные",
+    'main_menu':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
+    'chat_creation': "ОШИБКА: проверьте введенные данные",
+    'in_chat':"ОШИБКА: нельзя отправить пустое сообщение",
 }
 
 server_error_messages = {
-    'start':       "ОШИБКА: вероятно была введена неверная команда",
-    'sing_in':     "ОШИБКА: введены неверные данные",
-    'sing_up':     "ОШИБКА: пользователь с таким именем или логином уже существует",
-    'main':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
-    'create_chat': "ОШИБКА: пользователся с таким именем не существует",
-    'send_message':"ОШИБКА: !!!требуется доработка!!!",
+    'authorization':       "ОШИБКА: вероятно была введена неверная команда",
+    'login':     "ОШИБКА: введены неверные данные",
+    'register':     "ОШИБКА: пользователь с таким именем или логином уже существует",
+    'main_menu':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
+    'chat_creation': "ОШИБКА: пользователся с таким именем не существует",
+    'in_chat':"ОШИБКА: !!!требуется доработка!!!",
 }
 
 class server_answer:

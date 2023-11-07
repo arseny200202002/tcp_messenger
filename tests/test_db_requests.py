@@ -67,6 +67,10 @@ class TestDbRequests(unittest.TestCase):
     def test_get_user_id(self):
         self.assertEqual(get_user_id('test_login_1'), 1001)
 
+    def test_get_chat_id(self):
+        self.assertEqual(get_chat_id('test_chat'), 1001)
+        #self.assertEqual(get_chat_id('no_such_chat'), None)
+
     def test_create_user(self):
         address, port = random_addr_port()
         self.assertEqual(create_user('test_login_1', 'password', 'test_name_1', address, port), Exception)
@@ -107,6 +111,8 @@ class TestDbRequests(unittest.TestCase):
 
     def test_get_state(self):
         self.assertEqual(get_state(integer_to_ip(2130706432), 5002), 0)
+        self.assertEqual(get_state(integer_to_ip(2130706432), 5000), 1000)
+        self.assertEqual(get_state(integer_to_ip(0), 5002), None)
 
 if __name__ == "__main__":
     unittest.main()

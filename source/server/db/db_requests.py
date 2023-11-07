@@ -79,11 +79,25 @@ def get_user_id(login: str) -> int:
     user_id = Users.get(Users.login == login).id
     return user_id
 
+def get_chat_id(chat_name: str) -> int:
+    chat_id = Chats.get(Chats.name == chat_name).id
+    return chat_id
+
+#@get_requests
 def get_state(address: str, port: int) -> int:
-    state = Sessions.get(Sessions.address == address, Sessions.port == port).state
-    return state
+    query = Sessions.select(Sessions.state).where(Sessions.address == address, Sessions.port == port)
+    try:
+        return query[0].state
+    except Exception as e:
+        #print(e)
+        return None
 
 @exception_handler
 def update_session(state: int, time: datetime, address: str, port: int):
     query = Sessions.update(state=state, last_update_time=time).where(Sessions.address == address, Sessions.port == port)
     query.execute()
+
+
+# TO DO
+def end_old_sessions():
+    pass
