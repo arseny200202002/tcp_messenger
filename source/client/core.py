@@ -23,7 +23,11 @@ def client_handler(host, port):
         # receive answer 
         raw_answer = client_socket.recv(1024).decode()
         answer = parse_server_answer(raw_answer)
+
+        print(f"server answer: {raw_answer}")
+
         # обработка ошибок
+        print(answer.template)
         if answer.template != 'error':
             template = answer.template # вызываем новый шаблон если не было ошибки на строне сервера
         else:

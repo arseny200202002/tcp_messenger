@@ -118,12 +118,11 @@ def process_responce(address: str, port: int, state: int, responce: tuple) -> tu
             request from server to client: str
     """
     keyword, body = responce
-
     if body in list(basic_commands.keys()):
         new_state = basic_commands[body]
         request = 'TEMPLATE:' + state_names[new_state]
         return new_state, request
-    
+
     if body not in list(state_tree[state].keys()) and keyword not in list(state_tree[state].keys()):
         return state, 'ERROR'
     if keyword == 'ERROR':
@@ -131,6 +130,9 @@ def process_responce(address: str, port: int, state: int, responce: tuple) -> tu
     else:
         if keyword == 'DATA':
             # validate received data
+            if state == 2:
+                body.append(address)
+                body.append(port)
             data_to_send = state_processors.state_machine[state](*body)
             # if received data is invalid
             if data_to_send == False:

@@ -32,11 +32,12 @@ async def handle_connection(reader, writer):
             data = await reader.read(1024)
             data = data.decode()
             # understand client responce
+            state = get_state(address, port)
             response = parse_responce(data)
             new_state, request = process_responce(address, port, state, response)
 
             if new_state != state: # если состояние изменилось - обновляем сессию
-                update_session(state, datetime.now(), address, port)
+                update_session(new_state, datetime.now(), address, port)
 
         except ConnectionError:
             print(f"Client suddenly closed while receiving from {address} {port}")

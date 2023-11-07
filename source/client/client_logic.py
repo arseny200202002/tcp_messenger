@@ -6,7 +6,7 @@ class requests:
         for value in data:
             request += value   
             request += "|"          
-        return request.encode()
+        return request[:-1].encode()
     
     def command_request(command: str) -> str:
         request = "COMMAND" + ":"
@@ -19,9 +19,9 @@ basic_commands = {
     }
 
 commands = {
-    'login':      'LOGIN',
-    'register':      'REGISTER',
-    'chat_creation':  'CREATE',
+    'login':            'LOGIN',
+    'register':         'REGISTER',
+    'chat_creation':    'CREATE',
     }
 
 def data_validation(num_of_values=1):
@@ -84,21 +84,21 @@ class input_templates:
         }
 
 client_error_messages = {
-    'authorization':       "ОШИБКА: вероятно была введена неверная команда",
-    'login':     "ОШИБКА: проверьте введенные данные",
-    'register':     "ОШИБКА: проверьте введенные данные",
-    'main_menu':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
-    'chat_creation': "ОШИБКА: проверьте введенные данные",
-    'in_chat':"ОШИБКА: нельзя отправить пустое сообщение",
+    'authorization':        "ОШИБКА: вероятно была введена неверная команда",
+    'login':                "ОШИБКА: проверьте введенные данные",
+    'register':             "ОШИБКА: проверьте введенные данные",
+    'main_menu':            "ОШИБКА: введена невернаяя команда или неверное имя чата",
+    'chat_creation':        "ОШИБКА: проверьте введенные данные",
+    'in_chat':              "ОШИБКА: нельзя отправить пустое сообщение",
 }
 
 server_error_messages = {
-    'authorization':       "ОШИБКА: вероятно была введена неверная команда",
-    'login':     "ОШИБКА: введены неверные данные",
-    'register':     "ОШИБКА: пользователь с таким именем или логином уже существует",
-    'main_menu':        "ОШИБКА: введена невернаяя команда или неверное имя чата",
-    'chat_creation': "ОШИБКА: пользователся с таким именем не существует",
-    'in_chat':"ОШИБКА: !!!требуется доработка!!!",
+    'authorization':        "ОШИБКА: вероятно была введена неверная команда",
+    'login':                "ОШИБКА: введены неверные данные",
+    'register':             "ОШИБКА: пользователь с таким именем или логином уже существует",
+    'main_menu':            "ОШИБКА: введена невернаяя команда или неверное имя чата",
+    'chat_creation':        "ОШИБКА: пользователся с таким именем не существует",
+    'in_chat':              "ОШИБКА: !!!требуется доработка!!!",
 }
 
 class server_answer:

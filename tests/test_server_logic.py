@@ -37,6 +37,8 @@ class TestServerLogic(unittest.TestCase):
         print(process_responce(test_address, test_port, 0, responce))
         responce = parse_responce('COMMAND:EXIT')
         print(process_responce(test_address, test_port, 0, responce))
+    def test_register(self):
+        self.assertEqual()
 
 
 if __name__ == "__main__":
