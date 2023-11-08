@@ -1,5 +1,6 @@
 from db.db_requests import *
 import re
+import logging
 
 state_names = {
     0: 'authorization',
@@ -38,10 +39,11 @@ class state_processors:
     def authorization():
         pass
     # login : password_hash
-    def login(login: str, password_hash: str):
+    def login(login: str, password_hash: str, address: str, port: int):
         exists = check_sing_in(login, password_hash)
         if exists:
             user_id = get_user_id(login)
+            connect_session(user_id, datetime.now(), address, port)
             chats = get_chats(user_id)
             return chats
         else:
@@ -61,22 +63,38 @@ class state_processors:
         chat_id = get_chat_id(chat_name)
         messages = get_message_history(chat_id)
         return messages
-    # creator_id : chat_name : user_1_id : user_2_id
-    def create_chat(creator_id: int, chat_name: str, user_1_id: int, user_2_id: int):
-        error = create_chat(creator_id, chat_name, user_1_id, user_2_id)
+    
+    # username, chat_name, address, port
+    def create_chat(username: str, chat_name, address, port):
+        user_2_id = get_user_id_by_username(username)
+        creator_id = get_user_id_by_session(address, port)
+        logging.info(f"creator_id: {creator_id}, second user id: {user_2_id}")
+        if any([user_2_id, creator_id]) is None:
+
+            logging.error(f"no users with such name")
+
+            return False
+        error = create_chat(creator_id, chat_name, creator_id, user_2_id)
 
         if error == Exception:
+            
+            logging.error(f"unable to create chat")
+
             return False
         
         chat_id = get_chat_id(chat_name)
         messages = get_message_history(chat_id)
         return messages
+    
     # chat_id : text : author_name
     def send_message(chat_id: int, text: str, author_name: str):
         send_date = datetime.now()
         error = create_message(chat_id, text, send_date, author_name)
 
         if error == Exception:
+
+            logging.error(f"unable to create message in database")
+
             return False
         
         messages = get_message_history(chat_id)
@@ -84,11 +102,11 @@ class state_processors:
     
     state_machine = {
         0: authorization, 
-        1: login, # send chats
-        2: register, # send chats
-        3: choose_chat, # send message history
-        4: create_chat, # send message history
-        5: send_message, # update message history
+        1: login,           # send chats
+        2: register,        # send chats
+        3: choose_chat,     # send message history
+        4: create_chat,     # send message history
+        5: send_message,    # update message history
     }
 
 def parse_responce(responce: str) -> tuple:
@@ -118,24 +136,42 @@ def process_responce(address: str, port: int, state: int, responce: tuple) -> tu
             request from server to client: str
     """
     keyword, body = responce
+
+    logging.info(f"keyword: {keyword}, body of responce: {body}, current state: {state}")
+
+    # обработка базовых команд
     if body in list(basic_commands.keys()):
         new_state = basic_commands[body]
         request = 'TEMPLATE:' + state_names[new_state]
+
+        logging.info(f"received command: {body}, send request: {request}")
+
         return new_state, request
 
+    # обработка заведомо некорректных запросов
     if body not in list(state_tree[state].keys()) and keyword not in list(state_tree[state].keys()):
+
+        logging.error(f"bad received command")
+
         return state, 'ERROR'
     if keyword == 'ERROR':
+
+        logging.error(f"received error keyword from client")
+
         return state, 'ERROR'
+    
     else:
         if keyword == 'DATA':
             # validate received data
-            if state == 2:
+            if state in [1, 2, 4]: # в некоторые запросы нужно передавать адрес и порт, можно их передавать во все))
                 body.append(address)
                 body.append(port)
             data_to_send = state_processors.state_machine[state](*body)
             # if received data is invalid
             if data_to_send == False:
+
+                logging.error(f"bad received data from client, current state: {state_names[state]}")
+
                 return state, 'ERROR'
             # change state
             new_state = state_tree[state][keyword]

@@ -2,4 +2,5 @@ __pycache__
 /.venv
 /.vscode
 .ini
+.log
 to_do.txt

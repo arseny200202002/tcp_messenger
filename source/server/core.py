@@ -68,6 +68,8 @@ if __name__ == "__main__":
     host = config["SERVER"]["SERVER_HOST"]
     port = config["SERVER"]["SERVER_PORT"]
 
+    logging.basicConfig(level=logging.INFO, filename="server_log.log",filemode="w")
+
     asyncio.run(main(host, port))
 
 

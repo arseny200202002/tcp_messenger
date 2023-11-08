@@ -1,0 +1,7 @@
+INFO:root:keyword: COMMAND, body of responce: LOGIN, current state: 0
+INFO:root:keyword: DATA, body of responce: ['E', 'E'], current state: 1
+INFO:root:keyword: DATA, body of responce: ['tete'], current state: 3
+INFO:root:keyword: COMMAND, body of responce: BACK, current state: 5
+INFO:root:keyword: DATA, body of responce: ['ee'], current state: 3
+INFO:root:keyword: COMMAND, body of responce: BACK, current state: 5
+INFO:root:keyword: COMMAND, body of responce: CREATE, current state: 3

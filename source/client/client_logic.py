@@ -56,7 +56,7 @@ class input_templates:
     
     @data_validation(num_of_values=1)
     def main_menu() -> str:
-        print(f"для создания чата введите: {commands['chat_creation']}\n")
+        print(f"для создания чата введите: {commands['chat_creation']}")
         print("для выбора чата введите его название: ")
         return input()
     
@@ -67,6 +67,8 @@ class input_templates:
 
         print("введите название чата (можно оставить пустым):")
         chat_name = input()
+        if len(re.findall(r'\b\S+\b', chat_name)) == 0:
+            chat_name = username
         return username + ' ' + chat_name
     
     @data_validation(num_of_values=1)

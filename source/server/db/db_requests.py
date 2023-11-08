@@ -1,6 +1,7 @@
 from .db_model import *
 from datetime import datetime
 import random
+import logging
 
 def check_requests(func):
     def inner(*args, **kwargs):
@@ -17,7 +18,8 @@ def exception_handler(func):
             result = func(*args, **kwargs)
             return result
         except Exception as e:
-            #print(f"An exception occured: {str(e)}")
+            print(f"An exception occured: {str(e)}")
+            #logging.error(f"occured exception: {str(e)}")
             return Exception
     return inner
 
@@ -75,13 +77,37 @@ def get_chats(user_id: int) -> list:
     chats = [chat.name for chat in query]
     return chats
 
+def get_user_id_by_username(username: str):
+    try:
+        user_id = Users.get(Users.username == username).id
+        return user_id
+    except Exception as e:
+        print(f"exception occured: {e}")
+        return None
+
+def get_user_id_by_session(address: str, port: int):
+    try:
+        user_id = Sessions.get(Sessions.address == address, Sessions.port == port).user_id
+        return user_id
+    except Exception as e:
+        #print(f"exception occured: {e}")
+        return None
+
 def get_user_id(login: str) -> int:
-    user_id = Users.get(Users.login == login).id
-    return user_id
+    try:
+        user_id = Users.get(Users.login == login).id
+        return user_id
+    except Exception as e:
+        #print(f"exception occured: {e}")
+        return None
 
 def get_chat_id(chat_name: str) -> int:
-    chat_id = Chats.get(Chats.name == chat_name).id
-    return chat_id
+    try:
+        chat_id = Chats.get(Chats.name == chat_name).id
+        return chat_id
+    except Exception as e:
+        #print(f"exception occured: {e}")
+        return None
 
 #@get_requests
 def get_state(address: str, port: int) -> int:
@@ -93,8 +119,17 @@ def get_state(address: str, port: int) -> int:
         return None
 
 @exception_handler
+def connect_session(user_id: int, time: datetime, address: str, port: int):
+    query = (Sessions
+             .update(user_id=user_id, last_update_time=time, is_guest=False)
+             .where(Sessions.address == address, Sessions.port == port))
+    query.execute()
+
+@exception_handler
 def update_session(state: int, time: datetime, address: str, port: int):
-    query = Sessions.update(state=state, last_update_time=time).where(Sessions.address == address, Sessions.port == port)
+    query = (Sessions
+             .update(state=state, last_update_time=time)
+             .where(Sessions.address == address, Sessions.port == port))
     query.execute()
 
 
