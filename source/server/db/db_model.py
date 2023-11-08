@@ -31,8 +31,6 @@ class BaseModel(Model):
 class Users(BaseModel):
     username =      CharField(null=False, unique=True)
     password_hash = CharField(null=False)
-    login =         CharField(null=False, unique=True)
-    mail =          CharField(null=True, default=None, unique=True)
 
     class Meta:
         db_table = 'Users'
@@ -43,7 +41,7 @@ class Sessions(BaseModel):
     state =             IntegerField(default=0)
     address =           IPField(null=False)
     port =              IntegerField(null=False)
-    is_guest =          BooleanField(default=True)
+    chat_id =           IntegerField(null=True)
 
     class Meta:
         db_table = 'Sessions'

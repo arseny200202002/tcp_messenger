@@ -1,7 +1,13 @@
 INFO:root:keyword: COMMAND, body of responce: LOGIN, current state: 0
-INFO:root:keyword: DATA, body of responce: ['E', 'E'], current state: 1
-INFO:root:keyword: DATA, body of responce: ['tete'], current state: 3
+INFO:root:keyword: DATA, body of responce: ['TEST', 'TE'], current state: 1
+ERROR:root:bad received data from client, current state: login
+ERROR:root:we send ERROR request to client
+INFO:root:keyword: DATA, body of responce: ['TEST', 'TEST'], current state: 1
+INFO:root:keyword: DATA, body of responce: ['BEST'], current state: 3
+INFO:root:keyword: DATA, body of responce: ['AKAKAKAKA'], current state: 5
 INFO:root:keyword: COMMAND, body of responce: BACK, current state: 5
-INFO:root:keyword: DATA, body of responce: ['ee'], current state: 3
-INFO:root:keyword: COMMAND, body of responce: BACK, current state: 5
-INFO:root:keyword: COMMAND, body of responce: CREATE, current state: 3
+INFO:root:keyword: COMMAND, body of responce: EXIT, current state: 3
+INFO:root:received command: EXIT, send request: TEMPLATE:authorization
+INFO:root:keyword: COMMAND, body of responce: LOGIN, current state: 0
+INFO:root:keyword: DATA, body of responce: ['TEST', 'TEST'], current state: 1
+INFO:root:keyword: DATA, body of responce: ['BEST'], current state: 3

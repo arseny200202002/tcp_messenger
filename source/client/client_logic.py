@@ -41,28 +41,28 @@ def data_validation(num_of_values=1):
 class input_templates:
     @data_validation()
     def authorization() -> str:
-        print(f"для входа введите: {commands['login']}\nдля регистрации введите: {commands['register']}")
+        print(f"\nдля входа введите: {commands['login']}\nдля регистрации введите: {commands['register']}")
         return input()
 
     @data_validation(num_of_values=2)
     def login() -> str:
-        print("введите логин и пароль\n")
+        print("\nвведите логин и пароль")
         return input()
     
-    @data_validation(num_of_values=3)
+    @data_validation(num_of_values=2)
     def register() -> str:
-        print("введите логин, пароль и отображаемое имя: ")
+        print("\nвведите отображаемое имя и пароль: ")
         return input()
     
     @data_validation(num_of_values=1)
     def main_menu() -> str:
-        print(f"для создания чата введите: {commands['chat_creation']}")
+        print(f"\nдля создания чата введите: {commands['chat_creation']}")
         print("для выбора чата введите его название: ")
         return input()
     
     @data_validation(num_of_values=2)
     def chat_creation() -> str:
-        print("введите имя пользователя, с которым вы хотите создать чат: ")
+        print("\nвведите имя пользователя, с которым вы хотите создать чат: ")
         username = input()
 
         print("введите название чата (можно оставить пустым):")
@@ -73,7 +73,7 @@ class input_templates:
     
     @data_validation(num_of_values=1)
     def in_chat() -> str:
-        print("введите текст сообщения: ")
+        print("\nвведите текст сообщения: ")
         return input()
 
     templates = {

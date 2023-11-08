@@ -1,6 +1,8 @@
 import unittest
 from datetime import datetime
 import ipaddress
+import random
+
 
 import os 
 import sys 
@@ -54,67 +56,85 @@ def message_existence(text: str, author_name: str):
     else:
         return False
 
-class TestDbRequests(unittest.TestCase):
-  
-    def test_check_sing_in(self):
-        self.assertEqual(check_sing_in('test_login_1', 'password'), True)
-        self.assertEqual(check_sing_in('dont_exist', 'password'), False)
-
-    def test_check_sing_up(self):
-        self.assertEqual(check_sing_up('test_login_1'), True)
-        self.assertEqual(check_sing_up('dont_exist'), False)
-    
-    def test_get_user_id(self):
-        self.assertEqual(get_user_id('test_login_1'), 1001)
-
-    def test_get_chat_id(self):
-        self.assertEqual(get_chat_id('test_chat'), 1001)
-        #self.assertEqual(get_chat_id('no_such_chat'), None)
-
+class TestCreateRequests(unittest.TestCase):  
     def test_create_user(self):
         address, port = random_addr_port()
-        self.assertEqual(create_user('test_login_1', 'password', 'test_name_1', address, port), Exception)
-
+        self.assertEqual(create_user('name_1', 'password', address, port), False)
+        # setup 
         time = datetime.now()
         address, port = random_addr_port()
+        create_session(time, address, port)
 
-        self.assertEqual(type(create_user(f'{time}', 'password', f'{time}', address, port)), int)
+        self.assertEqual(type(create_user(f'{time}', 'password', address, port)), int)
 
+    def test_create_session(self):
+        address, port = random_addr_port()
+        create_session(datetime.now(), address, port)
+        self.assertEqual(session_existence(state=0, address=address, port=port), True)
+    
     def test_create_chat(self):
-        create_chat(1001, 'test_chat', 1001, 1002)
+        create_chat(creator_id=1001, name='test_chat', user_1_id=1001, user_2_id=1002) 
+        self.assertEqual(create_chat(creator_id=10000, name='test_chat', user_1_id=10000, user_2_id=10000), False) 
         self.assertEqual(chat_existence(1001, 'test_chat'), True)
 
     def test_create_message(self):
         now = datetime.now()
-        create_message(1002, str(now), now, str(now))
+        create_message(chat_id=1002, text=str(now), send_date=now, author_name=str(now))
         self.assertEqual(message_existence(str(now), str(now)), True)
 
-    def test_create_session(self):
-        # setup test data
-        now = datetime.now()
-        address, port = random_addr_port()
-
-        create_session(now, address, port)
-        # check session existence
-        self.assertEqual(session_existence(0, address, port), True)
-    
+class TestGetRequests(unittest.TestCase):
     def test_get_message_history(self):
         self.assertEqual(len(get_message_history(1001)), 4)
+        self.assertEqual(len(get_message_history(10000)), 0)
 
     def test_get_chats(self):
         self.assertEqual(len(get_chats(1003)), 1)
+        self.assertEqual(len(get_chats(10000)), 0)
+
+    def test_get_user_id(self):
+        self.assertEqual(get_user_id('name_1'), 1001)
+        self.assertEqual(get_user_id('dont_exists'), None)
+    
+    def test_get_chat_id(self):
+        self.assertEqual(get_chat_id('test_chat'), 1001)
+        self.assertEqual(get_chat_id('no_such_chat'), None)
+
+    def test_get_state(self):
+        self.assertEqual(get_state(integer_to_ip(2130706432), 5002), 0)
+        self.assertEqual(get_state(integer_to_ip(0), 5002), None)
+    
+    def test_get_user_id_by_session(self):
+        self.assertEqual(get_user_id_by_session(integer_to_ip(2130706432), 5001), 1001)
+        self.assertEqual(get_user_id_by_session(integer_to_ip(2130706432), 0), None)
+
+    def test_get_current_chat(self):
+        #self.assertEqual(get_current_chat(integer_to_ip(2130706432), 5001), )
+        self.assertEqual(get_current_chat(integer_to_ip(2130706432), 5001), None)
+
+    def test_get_username(self):
+        self.assertEqual(get_username(integer_to_ip(2130706432), 5001), 'name_1')
+
+class OtherRequests(unittest.TestCase):
+    def test_check_sing_in(self):
+        self.assertEqual(check_user_existence('name_1', 'password'), True)
+        self.assertEqual(check_user_existence('dont_exist', 'password'), False)
 
     def test_update_session(self):
         now = datetime.now()
         update_session(1000, now, '127.0.0.0', 5001)
         self.assertEqual(session_existence(state=1000, address='127.0.0.0', port=5001), True)
 
-    def test_get_state(self):
-        self.assertEqual(get_state(integer_to_ip(2130706432), 5002), 0)
-        self.assertEqual(get_state(integer_to_ip(2130706432), 5000), 1000)
-        self.assertEqual(get_state(integer_to_ip(0), 5002), None)
+    def test_connect_session(self):
+        address, port = random_addr_port()
+        create_session(datetime.now(), address, port)
+        connect_session(1001, datetime.now(), address, port)
+        self.assertEqual(get_user_id_by_session(address, port), 1001)
+
+    def test_set_chat(self):
+        set_chat(10000, datetime.now(), integer_to_ip(2130706432), 5002)
+        self.assertEqual(get_current_chat(integer_to_ip(2130706432), 5002), 10000)
 
 if __name__ == "__main__":
     unittest.main()
-    #tests = TestDbRequests().test_get_state()
+    #create_tests = TestCreateRequests().test_create_chat()
     

@@ -2,6 +2,8 @@ from db.db_requests import *
 import re
 import logging
 
+keywords = ['DATA', 'COMMAND']
+
 state_names = {
     0: 'authorization',
     1: 'login',
@@ -20,8 +22,6 @@ responce_expected = {
     5: ['DATA', 'COMMAND'],
 }
 
-# update будет проверять не пришло ли новое сообщение или не появился ли новый чат
-# пока не совсем ясно как это делать
 basic_commands = {
     'EXIT': 0
     }
@@ -35,63 +35,87 @@ state_tree = {
     5: {'DATA': 5, 'BACK': 3},
 }
 
-class state_processors:
-    def authorization():
+class state_machine:
+    def authorization(address, port):
         pass
-    # login : password_hash
-    def login(login: str, password_hash: str, address: str, port: int):
-        exists = check_sing_in(login, password_hash)
-        if exists:
-            user_id = get_user_id(login)
+
+    def login(username: str, password_hash: str, address: str, port: int):
+        if check_user_existence(username, password_hash):
+            user_id = get_user_id(username)
             connect_session(user_id, datetime.now(), address, port)
             chats = get_chats(user_id)
             return chats
         else:
             return False
-    # login : password_hash : username : address : port
-    def register(login: str, password_hash: str, username: str, address: str, port: int):
-        exists = check_sing_up(login)
-        if exists:
+    
+    def register(username: str, password_hash: str, address: str, port: int):
+        if check_user_existence(username, password_hash):
             return False
         else:
-            create_user(login, password_hash, username, address, port)
-            user_id = get_user_id(login)
+            result = create_user(username, password_hash, address, port)
+
+            if result == False:
+
+                logging.error(f"unable to create new user")
+
+                return False
+
+            user_id = get_user_id(username)
             chats = get_chats(user_id)
             return chats
-    # chat_name
-    def choose_chat(chat_name: str) -> list:
+        
+    def choose_chat(chat_name: str, address, port) -> list:
         chat_id = get_chat_id(chat_name)
+
+        if not chat_id:
+            
+            logging.error(f"no chat found with such name: {chat_name}")
+
+            return False
+        
+        set_chat(chat_id, datetime.now(), address, port)
         messages = get_message_history(chat_id)
+
         return messages
     
-    # username, chat_name, address, port
     def create_chat(username: str, chat_name, address, port):
-        user_2_id = get_user_id_by_username(username)
+        user_2_id = get_user_id(username)
         creator_id = get_user_id_by_session(address, port)
+
         logging.info(f"creator_id: {creator_id}, second user id: {user_2_id}")
+
         if any([user_2_id, creator_id]) is None:
 
             logging.error(f"no users with such name")
 
             return False
-        error = create_chat(creator_id, chat_name, creator_id, user_2_id)
+        
+        result = create_chat(creator_id, chat_name, creator_id, user_2_id)
 
-        if error == Exception:
+        if result == False:
             
             logging.error(f"unable to create chat")
 
             return False
         
         chat_id = get_chat_id(chat_name)
+
+        if not chat_id:
+            
+            logging.error(f"no chat found with such name: {chat_name}")
+
+            return False
+
+        set_chat(chat_id, datetime.now(), address, port)
         messages = get_message_history(chat_id)
         return messages
     
-    # chat_id : text : author_name
-    def send_message(chat_id: int, text: str, author_name: str):
-        send_date = datetime.now()
-        error = create_message(chat_id, text, send_date, author_name)
+    def send_message(text: str, address: str, port: int):
+        author_name =   get_username(address, port)
+        chat_id =       get_current_chat(address, port)
+        result = create_message(chat_id, text, datetime.now(), author_name)
 
-        if error == Exception:
+        if result == False:
 
             logging.error(f"unable to create message in database")
 
@@ -100,7 +124,7 @@ class state_processors:
         messages = get_message_history(chat_id)
         return messages
     
-    state_machine = {
+    state_processors = {
         0: authorization, 
         1: login,           # send chats
         2: register,        # send chats
@@ -110,13 +134,11 @@ class state_processors:
     }
 
 def parse_responce(responce: str) -> tuple:
-    """
-    returns tuple with type of request and body of request
-    """
     try:
         keyword, body = re.split(':', responce, 1)
     except:
         return 'ERROR', ''
+    
     if keyword == 'COMMAND':
         command = re.findall(r'\b\S+\b', body)[0]
         return 'COMMAND', command # return the found command
@@ -127,14 +149,6 @@ def parse_responce(responce: str) -> tuple:
         return 'ERROR', ''
 
 def process_responce(address: str, port: int, state: int, responce: tuple) -> tuple:
-    """
-    function creates request to the client \n
-    based on the responce and its current state \n
-    returns: \n 
-        tuple: \n
-            new state: int \n
-            request from server to client: str
-    """
     keyword, body = responce
 
     logging.info(f"keyword: {keyword}, body of responce: {body}, current state: {state}")
@@ -159,14 +173,21 @@ def process_responce(address: str, port: int, state: int, responce: tuple) -> tu
         logging.error(f"received error keyword from client")
 
         return state, 'ERROR'
-    
+
+    # обработка валидных запросов
     else:
         if keyword == 'DATA':
             # validate received data
-            if state in [1, 2, 4]: # в некоторые запросы нужно передавать адрес и порт, можно их передавать во все))
-                body.append(address)
-                body.append(port)
-            data_to_send = state_processors.state_machine[state](*body)
+            body.append(address)
+            body.append(port)
+
+            # check if received proper amount of values
+            try:
+                data_to_send = state_machine.state_processors[state](*body)
+            except:
+                logging.error(f"bad received data from client, current state {state_names[state]}")
+                return state, 'ERROR'
+            
             # if received data is invalid
             if data_to_send == False:
 
