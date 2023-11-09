@@ -2,14 +2,14 @@ import re
 
 class requests:
     def data_request(data:list) -> str:
-        request = "DATA" + ":"      
+        request = "DATA:"      
         for value in data:
             request += value   
             request += "|"          
         return request[:-1].encode()
     
     def command_request(command: str) -> str:
-        request = "COMMAND" + ":"
+        request = "COMMAND:"
         request += command
         return request.encode()
 
@@ -24,14 +24,17 @@ commands = {
     'chat_creation':    'CREATE',
     }
 
-def data_validation(num_of_values=1):
+def data_validation(num_of_values=0):
     def input_validation(func):
         def inner():
-            input = func()
-            if input is None: return 'error'
-            if input in commands.values() or input in basic_commands.values():
-                return requests.command_request(input)
-            words = re.findall(r'\b\S+\b', input)
+            user_input = func()
+            if user_input == '':
+                return 'error'
+            if user_input in commands.values() or user_input in basic_commands.values():
+                return requests.command_request(user_input)
+            if num_of_values == 0:
+                return requests.data_request([user_input])
+            words = re.findall(r'\b\S+\b', user_input)
             if len(words) != num_of_values:
                 return 'error'
             return requests.data_request(words)
@@ -39,7 +42,7 @@ def data_validation(num_of_values=1):
     return input_validation
 
 class input_templates:
-    @data_validation()
+    @data_validation(num_of_values=1)
     def authorization() -> str:
         print(f"\nдля входа введите: {commands['login']}\nдля регистрации введите: {commands['register']}")
         return input()
@@ -71,7 +74,7 @@ class input_templates:
             chat_name = username
         return username + ' ' + chat_name
     
-    @data_validation(num_of_values=1)
+    @data_validation(num_of_values=0)
     def in_chat() -> str:
         print("\nвведите текст сообщения: ")
         return input()

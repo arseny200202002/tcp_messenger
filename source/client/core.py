@@ -19,17 +19,23 @@ def client_handler(host, port):
         # input part
         request = input_templates.templates[template]()
         
+        
         # если на этапе проверки введенных данных возникла ошибка
         if request == 'error':
             print(client_error_messages[template])
             continue
         # send request
+        print(f"send request to server is: {request}")
         client_socket.sendall(request)
         # receive answer 
         raw_answer = client_socket.recv(1024).decode()
-        print(f"server answer is: {raw_answer}")
         # process answer
         answer = parse_server_answer(raw_answer)
+
+        if answer.data is not None:
+            print("\nreceived data from server:")
+            for data in answer.data:
+                print(data)
 
         # обработка ошибок
         if answer.template != 'error':
