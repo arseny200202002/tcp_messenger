@@ -42,11 +42,4 @@ def create_request(user_data: list) -> bytes:
     for data in user_data:
         request += data
         request += ':'
-    return request[:-1].encode()
-
-if __name__ == "__main__":
-    text = "<text>to login type: LOGIN\nto create account type: REGISTER<input>"
-    fields = parse_responce(text)
-    user_data = prosess_responce(fields)
-    request = create_request(user_data)
-    print(request)
+    return request.encode()
